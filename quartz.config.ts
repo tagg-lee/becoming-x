@@ -14,7 +14,7 @@ const config: QuartzConfig = {
     enablePopovers: true,
     analytics: null,
     locale: "ko-KR",
-    baseUrl: "becoming.tagg.me",
+    baseUrl: "becoming.tagglee.me",
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "modified",
     theme: {
