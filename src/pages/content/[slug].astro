@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import ContentLayout from '../../layouts/ContentLayout.astro';
+import { marked } from '../../lib/markdown';
+
+export async function getStaticPaths() {
+	const entries = await getCollection('pages');
+	return entries.map((entry) => ({
+		params: { slug: entry.data.slug },
+		props: { entry },
+	}));
+}
+
+const { entry } = Astro.props;
+const { title, description, tags, uploaded_date, created_date, format, body, rendered_html } =
+	entry.data;
+
+const html = format === 'md' ? await marked(body) : rendered_html;
+---
+
+<ContentLayout
+	title={title}
+	description={description}
+	tags={tags}
+	uploaded_date={uploaded_date}
+	created_date={created_date}
+>
+	<Fragment set:html={html} />
+</ContentLayout>
