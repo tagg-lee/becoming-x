@@ -23,6 +23,19 @@ const contributors: Record<string, Contributor> = {
 			{ platform: 'threads', url: 'https://www.threads.com/@voidlight00?hl=ko', label: 'Threads' },
 		],
 	},
+	'노션다움': {
+		name: '노션다움',
+		bio: 'Notion CEO | Vision Hub | 노션 강사',
+		avatar: 'https://cdn.litt.ly/images/9ZDKnUeaYIFHyoxen7FHy9UdBwGOM3Em?s=180x180&f=webp',
+		links: [
+			{ platform: 'litly', url: 'https://litt.ly/notionactually', label: 'Litt.ly' },
+			{ platform: 'youtube', url: 'https://www.youtube.com/@notionactually', label: 'YouTube' },
+			{ platform: 'instagram', url: 'https://www.instagram.com/notion_actually/', label: 'Instagram' },
+			{ platform: 'threads', url: 'https://www.threads.net/@notion_actually', label: 'Threads' },
+			{ platform: 'linkedin', url: 'https://www.linkedin.com/in/hyunserk-lee-1a4a5a284/', label: 'LinkedIn' },
+			{ platform: 'website', url: 'https://notionactually.liveklass.com/', label: 'LiveKlass' },
+		],
+	},
 };
 
 export function getContributor(name: string): Contributor | undefined {
