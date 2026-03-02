@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.0] - 2026-03-02
+
+### Added
+- Add Decap CMS at `/admin/` for browser-based content editing
+- Add Cloudflare Functions for GitHub OAuth (`/api/auth`, `/api/callback`)
+- Add CMS collection config for Markdown content (`content/*.md`)
+
+### Infrastructure
+- Configure `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` on Cloudflare Pages
+
 ## [0.1.0] - 2026-02-28
 
 ### Added
