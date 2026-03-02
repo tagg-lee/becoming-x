@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ContentCard from '../components/ContentCard.astro';
+import { getContributor, getAllContributorNames } from '../data/contributors';
 
 const entries = await getCollection('pages');
 const allTags = [...new Set(entries.flatMap((e) => e.data.tags))].sort();
@@ -9,6 +10,13 @@ const tagCounts = new Map<string, number>();
 for (const tag of allTags) {
 	tagCounts.set(tag, entries.filter((e) => e.data.tags.includes(tag)).length);
 }
+
+const contributorNames = getAllContributorNames();
+const contributorsData = contributorNames.map((name) => {
+	const contributor = getContributor(name)!;
+	const count = entries.filter((e) => e.data.contributor === name).length;
+	return { ...contributor, count };
+});
 ---
 
 <BaseLayout title="Becoming X">
@@ -40,6 +48,47 @@ for (const tag of allTags) {
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 					</svg>
 				</button>
+			</div>
+		</section>
+	)}
+
+	<!-- Contributors -->
+	{contributorsData.length > 0 && (
+		<section class="mb-8">
+			<div class="mb-4 flex items-center justify-between">
+				<h2 class="text-lg font-bold text-gray-900">Contributors</h2>
+				<a href="/contributors/" class="text-sm font-medium text-purple-600 transition-colors hover:text-purple-800">
+					View all &rarr;
+				</a>
+			</div>
+			<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+				{contributorsData.map((c) => (
+					<a
+						href={`/contributors/${c.name}`}
+						class="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-colors hover:border-purple-300 hover:bg-purple-50"
+					>
+						{c.avatar ? (
+							<img
+								src={c.avatar}
+								alt={c.name}
+								class="h-12 w-12 shrink-0 rounded-full object-cover"
+							/>
+						) : (
+							<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-100 text-lg font-bold text-purple-600">
+								{c.name.charAt(0)}
+							</div>
+						)}
+						<div class="min-w-0 flex-1">
+							<div class="flex items-center gap-2">
+								<span class="truncate font-semibold text-gray-900">{c.name}</span>
+								<span class="shrink-0 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
+									{c.count}
+								</span>
+							</div>
+							<p class="truncate text-sm text-gray-500">{c.bio}</p>
+						</div>
+					</a>
+				))}
 			</div>
 		</section>
 	)}
