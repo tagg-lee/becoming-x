@@ -12,7 +12,7 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { title, description, tags, uploaded_date, created_date, format, body, rendered_html } =
+const { title, description, tags, uploaded_date, created_date, contributor, format, body, rendered_html } =
 	entry.data;
 
 const html = format === 'md' ? await marked(body) : rendered_html;
@@ -25,6 +25,7 @@ const headings = format === 'md' ? extractHeadings(body) : extractHeadingsFromHt
 	tags={tags}
 	uploaded_date={uploaded_date}
 	created_date={created_date}
+	contributor={contributor}
 	headings={headings}
 >
 	<Fragment set:html={html} />

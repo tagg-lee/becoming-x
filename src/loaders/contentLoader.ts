@@ -14,6 +14,9 @@ interface ContentEntry {
 	tags: string[];
 	uploaded_date: string;
 	created_date: string;
+	published_date: string;
+	updated_date: string;
+	contributor: string;
 	body: string;
 	rendered_html: string;
 	format: 'md' | 'html';
@@ -86,6 +89,9 @@ export function contentLoader(): Loader {
 					tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
 					uploaded_date: toDateString(data.uploaded_date),
 					created_date: toDateString(data.created_date),
+					published_date: toDateString(data.published_date),
+					updated_date: toDateString(data.updated_date),
+					contributor: (data.contributor as string) ?? '',
 					body,
 					rendered_html,
 					format: ext,
