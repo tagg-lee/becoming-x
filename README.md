@@ -2,7 +2,16 @@
 
 Markdown와 HTML 파일을 `content/` 폴더에 넣고 push하면 자동으로 빌드·배포되는 정적 콘텐츠 대시보드.
 
-**Live:** https://becoming-x.pages.dev
+**Live:** https://becomingx.tagg.kr
+
+## Author
+
+| | |
+|---|---|
+| **이름** | 이태극 (Taegeuk Lee) |
+| **닉네임** | Tagg Lee |
+| **이메일** | overmensch280@gmail.com |
+| **커맨드스페이스** | [class.cmdspace.kr](https://class.cmdspace.kr/) · [slashpage](https://slashpage.com/cmds-class) |
 
 ## Tech Stack
 

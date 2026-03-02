@@ -1,4 +1,6 @@
 ---
+import '../styles/global.css';
+
 interface Props {
 	title: string;
 	description?: string;
@@ -24,5 +26,19 @@ const { title, description = 'Becoming X — Content Dashboard' } = Astro.props;
 		<main class="mx-auto max-w-6xl px-4 py-8">
 			<slot />
 		</main>
+		<footer class="mt-16 border-t border-gray-200 bg-white">
+			<div class="mx-auto max-w-6xl px-4 py-6">
+				<div class="flex flex-col items-center gap-2 text-sm text-gray-400">
+					<p>&copy; {new Date().getFullYear()} Becoming X — Tagg Lee (이태극)</p>
+					<p>
+						<a href="mailto:overmensch280@gmail.com" class="hover:text-gray-600 transition-colors">overmensch280@gmail.com</a>
+						<span class="mx-1">·</span>
+						<a href="https://class.cmdspace.kr/" target="_blank" rel="noopener noreferrer" class="hover:text-gray-600 transition-colors">CMDSPACE_Class</a>
+						<span class="mx-1">·</span>
+						<a href="https://slashpage.com/cmds-class" target="_blank" rel="noopener noreferrer" class="hover:text-gray-600 transition-colors">CMDS_Materials</a>
+					</p>
+				</div>
+			</div>
+		</footer>
 	</body>
 </html>

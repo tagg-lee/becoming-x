@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import type { TocHeading } from '../lib/markdown';
 
 interface Props {
 	title: string;
@@ -7,35 +8,163 @@ interface Props {
 	tags: string[];
 	uploaded_date: string;
 	created_date: string;
+	headings?: TocHeading[];
 }
 
-const { title, description, tags, uploaded_date, created_date } = Astro.props;
+const { title, description, tags, uploaded_date, created_date, headings = [] } = Astro.props;
+const showToc = headings.length >= 2;
 ---
 
 <BaseLayout title={title} description={description}>
-	<article class="mx-auto max-w-3xl">
-		<header class="mb-8">
-			<a href="/" class="mb-4 inline-block text-sm text-gray-500 hover:text-gray-700">
-				&larr; Back to dashboard
-			</a>
-			<h1 class="mb-2 text-3xl font-bold">{title}</h1>
-			{description && <p class="mb-4 text-lg text-gray-600">{description}</p>}
-			<div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-				<span>Uploaded: {uploaded_date}</span>
-				<span>Created: {created_date}</span>
-			</div>
-			{tags.length > 0 && (
-				<div class="mt-3 flex flex-wrap gap-2">
-					{tags.map((tag) => (
-						<span class="rounded-full bg-gray-200 px-3 py-1 text-xs font-medium text-gray-700">
-							{tag}
-						</span>
+	<div class={showToc ? 'content-with-toc' : ''}>
+		{showToc && (
+			<nav class="toc-sidebar" aria-label="Table of contents">
+				<button class="toc-toggle" aria-expanded="false">
+					<svg class="toc-icon" viewBox="0 0 16 16" fill="currentColor">
+						<path d="M2 3.75A.75.75 0 0 1 2.75 3h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 3.75Zm2 4A.75.75 0 0 1 4.75 7h6.5a.75.75 0 0 1 0 1.5h-6.5A.75.75 0 0 1 4 7.75Zm2 4a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z" />
+					</svg>
+					<span>On this page</span>
+					<svg class="toc-chevron" viewBox="0 0 16 16" fill="currentColor">
+						<path d="M12.78 5.22a.749.749 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.06 0L3.22 6.28a.749.749 0 1 1 1.06-1.06L8 8.939l3.72-3.719a.749.749 0 0 1 1.06 0Z" />
+					</svg>
+				</button>
+				<ol class="toc-list toc-list--collapsed">
+					{headings.map((heading) => (
+						<li class={`toc-item toc-item--h${heading.depth}`}>
+							<a href={`#${heading.id}`} class="toc-link" data-heading-id={heading.id}>
+								{heading.text}
+							</a>
+						</li>
 					))}
+				</ol>
+			</nav>
+		)}
+
+		<article class="mx-auto max-w-3xl">
+			<header class="mb-8">
+				<a href="/" class="mb-4 inline-block text-sm text-gray-500 hover:text-gray-700">
+					&larr; Back to dashboard
+				</a>
+				<h1 class="mb-2 text-3xl font-bold">{title}</h1>
+				{description && <p class="mb-4 text-lg text-gray-600">{description}</p>}
+				<div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+					<span>Uploaded: {uploaded_date}</span>
+					<span>Created: {created_date}</span>
 				</div>
-			)}
-		</header>
-		<div class="prose prose-gray max-w-none">
-			<slot />
-		</div>
-	</article>
+				{tags.length > 0 && (
+					<div class="mt-3 flex flex-wrap gap-2">
+						{tags.map((tag) => (
+							<a
+								href={`/tags/${tag}`}
+								class="rounded-full bg-gray-200 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-800 hover:text-white"
+							>
+								{tag}
+							</a>
+						))}
+					</div>
+				)}
+			</header>
+			<div class="prose prose-gray max-w-none">
+				<slot />
+			</div>
+		</article>
+	</div>
 </BaseLayout>
+
+{showToc && (
+	<script>
+		function initToc() {
+			const toggle = document.querySelector('.toc-toggle') as HTMLButtonElement | null;
+			const list = document.querySelector('.toc-list') as HTMLOListElement | null;
+			if (!toggle || !list) return;
+
+			// Desktop: always expanded, no toggle
+			const mql = window.matchMedia('(min-width: 1280px)');
+
+			function applyDesktop(isDesktop: boolean) {
+				if (isDesktop) {
+					toggle.setAttribute('aria-expanded', 'true');
+					list.classList.remove('toc-list--collapsed');
+				} else {
+					toggle.setAttribute('aria-expanded', 'false');
+					list.classList.add('toc-list--collapsed');
+				}
+			}
+
+			applyDesktop(mql.matches);
+			mql.addEventListener('change', (e) => applyDesktop(e.matches));
+
+			// Toggle collapse (mobile only)
+			toggle.addEventListener('click', () => {
+				if (mql.matches) return;
+				const expanded = toggle.getAttribute('aria-expanded') === 'true';
+				toggle.setAttribute('aria-expanded', String(!expanded));
+				list.classList.toggle('toc-list--collapsed');
+			});
+
+			// Active heading tracking
+			const links = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
+			const headingIds = Array.from(links).map((link) => link.dataset.headingId!);
+			const headingElements = headingIds
+				.map((id) => document.getElementById(id))
+				.filter(Boolean) as HTMLElement[];
+
+			if (headingElements.length === 0) return;
+
+			let activeId = '';
+
+			function updateActive() {
+				const scrollY = window.scrollY;
+				const offset = 100;
+				let currentId = headingElements[0]?.id ?? '';
+
+				for (const el of headingElements) {
+					if (el.offsetTop - offset <= scrollY) {
+						currentId = el.id;
+					}
+				}
+
+				if (currentId !== activeId) {
+					activeId = currentId;
+					links.forEach((link) => {
+						link.classList.toggle('toc-link--active', link.dataset.headingId === activeId);
+					});
+				}
+			}
+
+			let ticking = false;
+			window.addEventListener('scroll', () => {
+				if (!ticking) {
+					requestAnimationFrame(() => {
+						updateActive();
+						ticking = false;
+					});
+					ticking = true;
+				}
+			});
+
+			updateActive();
+
+			// Smooth scroll
+			links.forEach((link) => {
+				link.addEventListener('click', (e) => {
+					e.preventDefault();
+					const targetId = link.dataset.headingId;
+					const target = targetId ? document.getElementById(targetId) : null;
+					if (target) {
+						target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+						history.replaceState(null, '', `#${targetId}`);
+					}
+
+					// Close mobile TOC after click
+					if (!mql.matches) {
+						toggle!.setAttribute('aria-expanded', 'false');
+						list!.classList.add('toc-list--collapsed');
+					}
+				});
+			});
+		}
+
+		initToc();
+	</script>
+)}

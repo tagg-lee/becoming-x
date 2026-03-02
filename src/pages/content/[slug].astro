@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import ContentLayout from '../../layouts/ContentLayout.astro';
-import { marked } from '../../lib/markdown';
+import { marked, extractHeadings, extractHeadingsFromHtml } from '../../lib/markdown';
 
 export async function getStaticPaths() {
 	const entries = await getCollection('pages');
@@ -16,6 +16,7 @@ const { title, description, tags, uploaded_date, created_date, format, body, ren
 	entry.data;
 
 const html = format === 'md' ? await marked(body) : rendered_html;
+const headings = format === 'md' ? extractHeadings(body) : extractHeadingsFromHtml(html);
 ---
 
 <ContentLayout
@@ -24,6 +25,7 @@ const html = format === 'md' ? await marked(body) : rendered_html;
 	tags={tags}
 	uploaded_date={uploaded_date}
 	created_date={created_date}
+	headings={headings}
 >
 	<Fragment set:html={html} />
 </ContentLayout>

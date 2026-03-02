@@ -5,67 +5,106 @@ import ContentCard from '../components/ContentCard.astro';
 
 const entries = await getCollection('pages');
 const allTags = [...new Set(entries.flatMap((e) => e.data.tags))].sort();
+const tagCounts = new Map<string, number>();
+for (const tag of allTags) {
+	tagCounts.set(tag, entries.filter((e) => e.data.tags.includes(tag)).length);
+}
 ---
 
 <BaseLayout title="Becoming X">
-	<!-- Controls -->
-	<div class="mb-6 space-y-4">
-		<!-- Search -->
-		<input
-			id="search"
-			type="text"
-			placeholder="Search by title or description..."
-			class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-gray-500 focus:outline-none"
-		/>
-
-		<!-- Tags -->
-		{allTags.length > 0 && (
-			<div id="tag-filters" class="flex flex-wrap gap-2">
-				{allTags.map((tag) => (
-					<button
-						class="tag-btn rounded-full border border-gray-300 px-3 py-1 text-xs transition-colors hover:bg-gray-200"
-						data-tag={tag}
-					>
-						{tag}
-					</button>
-				))}
+	<!-- Browse by Tag -->
+	{allTags.length > 0 && (
+		<section class="mb-8">
+			<h2 class="mb-4 text-lg font-bold text-gray-900">Browse by Tag</h2>
+			<div class="rounded-lg border border-gray-200 bg-white">
+				<div id="tag-browse" class="relative overflow-hidden px-4 pt-4 transition-[max-height] duration-300 ease-in-out" style="max-height: 6rem;">
+					<div id="tag-browse-inner" class="flex flex-wrap gap-2 pb-4">
+						{allTags.map((tag) => (
+							<a
+								href={`/tags/${tag}`}
+								class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-800 hover:text-white hover:border-gray-800"
+							>
+								<span>{tag}</span>
+								<span class="rounded-full bg-white px-1.5 py-0.5 text-xs text-gray-400">{tagCounts.get(tag)}</span>
+							</a>
+						))}
+					</div>
+					<div id="tag-browse-fade" class="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white to-transparent"></div>
+				</div>
+				<button
+					id="tag-browse-toggle"
+					class="flex w-full items-center justify-center gap-1 border-t border-gray-100 py-2.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+				>
+					<span id="tag-browse-toggle-text">Show all tags</span>
+					<svg id="tag-browse-toggle-icon" class="h-3.5 w-3.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+					</svg>
+				</button>
 			</div>
-		)}
+		</section>
+	)}
 
-		<!-- Sort -->
-		<div class="flex items-center gap-3">
-			<label for="sort-select" class="text-sm text-gray-500">Sort by:</label>
-			<select
-				id="sort-select"
-				class="rounded border border-gray-300 px-3 py-1.5 text-sm focus:border-gray-500 focus:outline-none"
-			>
-				<option value="uploaded-desc">Uploaded (newest)</option>
-				<option value="uploaded-asc">Uploaded (oldest)</option>
-				<option value="created-desc">Created (newest)</option>
-				<option value="created-asc">Created (oldest)</option>
-				<option value="title-asc">Title (A-Z)</option>
-				<option value="title-desc">Title (Z-A)</option>
-			</select>
-		</div>
-	</div>
+	<!-- All Contents -->
+	<section>
+		<h2 class="mb-4 text-lg font-bold text-gray-900">Search Contents</h2>
 
-	<!-- Card Grid -->
-	<div id="card-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-		{entries.map((entry) => (
-			<ContentCard
-				slug={entry.data.slug}
-				title={entry.data.title}
-				description={entry.data.description}
-				tags={entry.data.tags}
-				uploaded_date={entry.data.uploaded_date}
-				created_date={entry.data.created_date}
-				format={entry.data.format}
+		<!-- Search & Filter controls -->
+		<div class="mb-6 space-y-3 rounded-lg border border-gray-200 bg-white p-4">
+			<input
+				id="search"
+				type="text"
+				placeholder="Search by title or description..."
+				class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-gray-500 focus:outline-none"
 			/>
-		))}
-	</div>
 
-	<!-- Empty state -->
-	<p id="no-results" class="mt-8 hidden text-center text-gray-400">No matching content found.</p>
+			{allTags.length > 0 && (
+				<div id="tag-filters" class="flex flex-wrap gap-2">
+					{allTags.map((tag) => (
+						<button
+							class="tag-btn rounded-full border border-gray-300 px-3 py-1 text-xs transition-colors hover:bg-gray-200"
+							data-tag={tag}
+						>
+							{tag}
+						</button>
+					))}
+				</div>
+			)}
+
+			<div class="flex items-center gap-3">
+				<label for="sort-select" class="text-sm text-gray-500">Sort by:</label>
+				<select
+					id="sort-select"
+					class="rounded border border-gray-300 px-3 py-1.5 text-sm focus:border-gray-500 focus:outline-none"
+				>
+					<option value="uploaded-desc">Uploaded (newest)</option>
+					<option value="uploaded-asc">Uploaded (oldest)</option>
+					<option value="created-desc">Created (newest)</option>
+					<option value="created-asc">Created (oldest)</option>
+					<option value="title-asc">Title (A-Z)</option>
+					<option value="title-desc">Title (Z-A)</option>
+				</select>
+			</div>
+		</div>
+
+		<!-- Card Grid -->
+		<div id="card-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			{entries.map((entry) => (
+				<ContentCard
+					slug={entry.data.slug}
+					title={entry.data.title}
+					description={entry.data.description}
+					tags={entry.data.tags}
+					uploaded_date={entry.data.uploaded_date}
+					created_date={entry.data.created_date}
+					format={entry.data.format}
+				/>
+			))}
+		</div>
+
+		<!-- Empty state -->
+		<p id="no-results" class="mt-8 hidden text-center text-gray-400">No matching content found.</p>
+	</section>
+
 </BaseLayout>
 
 <script>
@@ -154,4 +193,39 @@ const allTags = [...new Set(entries.flatMap((e) => e.data.tags))].sort();
 
 	// Initial sort
 	applySort();
+
+	// Browse by Tag toggle
+	const browseContainer = document.getElementById('tag-browse');
+	const browseInner = document.getElementById('tag-browse-inner');
+	const browseToggle = document.getElementById('tag-browse-toggle');
+	const browseToggleText = document.getElementById('tag-browse-toggle-text');
+	const browseToggleIcon = document.getElementById('tag-browse-toggle-icon');
+	const browseFade = document.getElementById('tag-browse-fade');
+
+	if (browseContainer && browseInner && browseToggle && browseToggleText && browseToggleIcon && browseFade) {
+		let expanded = false;
+		const collapsedHeight = 96; // 6rem in px
+
+		// Hide toggle + fade if all tags fit
+		if (browseInner.scrollHeight <= collapsedHeight) {
+			browseToggle.style.display = 'none';
+			browseFade.style.display = 'none';
+			browseContainer.style.maxHeight = 'none';
+		}
+
+		browseToggle.addEventListener('click', () => {
+			expanded = !expanded;
+			if (expanded) {
+				browseContainer.style.maxHeight = browseInner.scrollHeight + 'px';
+				browseFade.style.display = 'none';
+				browseToggleText.textContent = 'Show less';
+				browseToggleIcon.style.transform = 'rotate(180deg)';
+			} else {
+				browseContainer.style.maxHeight = collapsedHeight + 'px';
+				browseFade.style.display = '';
+				browseToggleText.textContent = 'Show all tags';
+				browseToggleIcon.style.transform = '';
+			}
+		});
+	}
 </script>
