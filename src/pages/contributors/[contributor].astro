@@ -2,13 +2,15 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ContentCard from '../../components/ContentCard.astro';
-import { getContributor } from '../../data/contributors';
+import { getContributor, getAllContributorNames } from '../../data/contributors';
 
 export async function getStaticPaths() {
 	const entries = await getCollection('pages');
-	const contributors = [...new Set(entries.map((e) => e.data.contributor).filter(Boolean))];
+	const contentContributors = entries.map((e) => e.data.contributor).filter(Boolean);
+	const registeredContributors = getAllContributorNames();
+	const allContributors = [...new Set([...contentContributors, ...registeredContributors])];
 
-	return contributors.map((contributor) => ({
+	return allContributors.map((contributor) => ({
 		params: { contributor },
 		props: {
 			contributor,

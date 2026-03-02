@@ -41,3 +41,7 @@ const contributors: Record<string, Contributor> = {
 export function getContributor(name: string): Contributor | undefined {
 	return contributors[name];
 }
+
+export function getAllContributorNames(): string[] {
+	return Object.keys(contributors);
+}
