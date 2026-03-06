@@ -1,0 +1,175 @@
+---
+// No props needed – reads current page URL at runtime
+---
+
+<!-- Share Button -->
+<button
+	id="share-btn"
+	aria-label="Share this page"
+	class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900"
+>
+	<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+		<polyline points="16 6 12 2 8 6"/>
+		<line x1="12" y1="2" x2="12" y2="15"/>
+	</svg>
+	Share
+</button>
+
+<!-- Share Modal -->
+<div
+	id="share-modal"
+	class="fixed inset-0 z-50 hidden items-center justify-center p-4"
+	role="dialog"
+	aria-modal="true"
+	aria-labelledby="share-modal-title"
+>
+	<!-- Backdrop -->
+	<div id="share-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+	<!-- Panel -->
+	<div class="relative w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+		<!-- Header -->
+		<div class="mb-5 flex items-center justify-between">
+			<h2 id="share-modal-title" class="text-base font-semibold text-gray-900">Share</h2>
+			<button id="share-close" class="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600" aria-label="Close">
+				<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<line x1="18" y1="6" x2="6" y2="18"/>
+					<line x1="6" y1="6" x2="18" y2="18"/>
+				</svg>
+			</button>
+		</div>
+
+		<!-- URL Copy -->
+		<div class="mb-5">
+			<label class="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gray-400">Page URL</label>
+			<div class="flex items-center gap-2">
+				<input
+					id="share-url"
+					type="text"
+					readonly
+					class="min-w-0 flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:outline-none"
+				/>
+				<button
+					id="copy-url-btn"
+					class="shrink-0 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+				>
+					Copy
+				</button>
+			</div>
+			<p id="copy-url-feedback" class="mt-1.5 hidden text-xs font-medium text-green-600">Copied!</p>
+		</div>
+
+		<!-- QR Code -->
+		<div>
+			<label class="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gray-400">QR Code</label>
+			<div class="flex flex-col items-center gap-4 rounded-xl border border-gray-100 bg-gray-50 p-4">
+				<canvas id="share-qr" class="rounded-lg"></canvas>
+				<div class="flex w-full gap-2">
+					<button
+						id="download-qr-btn"
+						class="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+					>
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+							<polyline points="7 10 12 15 17 10"/>
+							<line x1="12" y1="15" x2="12" y2="3"/>
+						</svg>
+						Download
+					</button>
+					<button
+						id="copy-qr-btn"
+						class="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+					>
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+							<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+						</svg>
+						Copy Image
+					</button>
+				</div>
+				<p id="copy-qr-feedback" class="hidden text-xs font-medium text-green-600">QR image copied!</p>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	import QRCode from 'qrcode';
+
+	const shareBtn = document.getElementById('share-btn')!;
+	const modal = document.getElementById('share-modal')!;
+	const backdrop = document.getElementById('share-backdrop')!;
+	const closeBtn = document.getElementById('share-close')!;
+	const urlInput = document.getElementById('share-url') as HTMLInputElement;
+	const copyUrlBtn = document.getElementById('copy-url-btn')!;
+	const copyUrlFeedback = document.getElementById('copy-url-feedback')!;
+	const canvas = document.getElementById('share-qr') as HTMLCanvasElement;
+	const downloadBtn = document.getElementById('download-qr-btn')!;
+	const copyQrBtn = document.getElementById('copy-qr-btn')!;
+	const copyQrFeedback = document.getElementById('copy-qr-feedback')!;
+
+	function openModal() {
+		const url = window.location.href;
+		urlInput.value = url;
+		modal.classList.remove('hidden');
+		modal.classList.add('flex');
+		document.body.style.overflow = 'hidden';
+
+		QRCode.toCanvas(canvas, url, {
+			width: 200,
+			margin: 2,
+			color: { dark: '#111827', light: '#FFFFFF' },
+		});
+	}
+
+	function closeModal() {
+		modal.classList.add('hidden');
+		modal.classList.remove('flex');
+		document.body.style.overflow = '';
+		copyUrlFeedback.classList.add('hidden');
+		copyQrFeedback.classList.add('hidden');
+	}
+
+	shareBtn.addEventListener('click', openModal);
+	closeBtn.addEventListener('click', closeModal);
+	backdrop.addEventListener('click', closeModal);
+
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+	});
+
+	// Copy URL
+	copyUrlBtn.addEventListener('click', async () => {
+		await navigator.clipboard.writeText(urlInput.value);
+		copyUrlFeedback.classList.remove('hidden');
+		copyUrlBtn.textContent = 'Copied!';
+		setTimeout(() => {
+			copyUrlFeedback.classList.add('hidden');
+			copyUrlBtn.textContent = 'Copy';
+		}, 2000);
+	});
+
+	// Download QR
+	downloadBtn.addEventListener('click', () => {
+		const link = document.createElement('a');
+		link.download = 'qr-code.png';
+		link.href = canvas.toDataURL('image/png');
+		link.click();
+	});
+
+	// Copy QR image to clipboard
+	copyQrBtn.addEventListener('click', async () => {
+		canvas.toBlob(async (blob) => {
+			if (!blob) return;
+			try {
+				await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+				copyQrFeedback.classList.remove('hidden');
+				setTimeout(() => copyQrFeedback.classList.add('hidden'), 2000);
+			} catch {
+				// Fallback: download instead
+				downloadBtn.click();
+			}
+		}, 'image/png');
+	});
+</script>

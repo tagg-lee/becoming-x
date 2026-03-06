@@ -2,6 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import type { TocHeading } from '../lib/markdown';
 import ContributorBadge from '../components/ContributorBadge.astro';
+import ShareButton from '../components/ShareButton.astro';
 
 interface Props {
 	title: string;
@@ -44,9 +45,12 @@ const showToc = headings.length >= 2;
 
 		<article class="mx-auto max-w-3xl">
 			<header class="mb-8">
-				<a href="/" class="mb-4 inline-block text-sm text-gray-500 hover:text-gray-700">
-					&larr; Back to dashboard
-				</a>
+				<div class="mb-4 flex items-center justify-between">
+					<a href="/" class="text-sm text-gray-500 hover:text-gray-700">
+						&larr; Back to dashboard
+					</a>
+					<ShareButton />
+				</div>
 				<div class="article-dateline">
 					<div class="dateline-item">
 						<svg class="dateline-icon" viewBox="0 0 16 16" fill="currentColor">
